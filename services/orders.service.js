@@ -1,4 +1,6 @@
 var OrdersDao = require('../daos/orders.dao')
+var WidgetsRUsModel = require('@widgets-r-us/model')
+var OrderProduct = WidgetsRUsModel.OrderProduct
 
 exports.getOrders = async function(req, res, next) {
   try {
@@ -59,4 +61,27 @@ exports.updateOrder = async function(req, res, next) {
   } catch(e) {
     return res.status(400).json({status: 400, message: e.message})
   }
+}
+
+exports.clearOrder = async function (req, res, next) {
+  // if we're clearing an order we need to remove all the productIds associated
+  // with this orderId
+  // find and remove all OrderProduct entries where orderId = inOrderId
+}
+exports.addProduct = async function (req, res, next) {
+  // pass in orderId
+  // pass in productId
+  // find entry with orderId = inOrderId and productId = inProductId
+  // if exists
+  //    increment quantity
+  // else
+  //    save entry to OrderProduct
+}
+exports.removeProduct = async function (req, res, next) {
+  // pass in orderId
+  // pass in productId
+}
+exports.setQuantity = async function (req, res, next) {
+  // pass in orderId
+  // pass in productId
 }

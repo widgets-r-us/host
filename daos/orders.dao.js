@@ -1,10 +1,10 @@
-var WidgetsRUsModel = require('../../model/src/models')
+var WidgetsRUsModel = require('@widgets-r-us/model')
 var Order = WidgetsRUsModel.Order
 var WidgetsRUsError = WidgetsRUsModel.WidgetsRUsError
 
 exports.readOrders = async function() {
   try {
-    var orders = await Order.find({}, function(err, orders){})/*.exec()*/
+    var orders = await Order.find({}, function(err, orders){})
     return orders
   } catch (e) {
     throw Error(new WidgetsRUsError({

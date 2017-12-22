@@ -1,6 +1,9 @@
+var ApiResponse = require('api-response').ApiResponse
 var OrdersDao = require('../daos/orders.dao')
 var WidgetsRUsModel = require('@widgets-r-us/model')
 var OrderProduct = WidgetsRUsModel.OrderProduct
+var Order = WidgetsRUsModel.Order
+var Product = WidgetsRUsModel.Product
 
 exports.getOrders = async function(req, res, next) {
   try {
@@ -15,7 +18,7 @@ exports.getMyOrder = async function(req, res, next) {
   var widgetsRUsUserId = req.query.widgetsRUsUserId
   // TODO(ajmed): validate order, for now do some poor man validation
   if (!req.body.widgetsRUsUserId)
-    return res.status(400).json({status: 400, message: "No widgetsRUsUserId was specified"})
+    return new ApiResponse(400, "No widgetsRUsUserId was specified")
 
   var page = req.query.page ? req.query.page : 1
   var limit = req.query.limit ? req.query.limit : 1
@@ -67,7 +70,9 @@ exports.clearOrder = async function (req, res, next) {
   // if we're clearing an order we need to remove all the productIds associated
   // with this orderId
   // find and remove all OrderProduct entries where orderId = inOrderId
+
 }
+
 exports.addProduct = async function (req, res, next) {
   // pass in orderId
   // pass in productId
@@ -77,11 +82,15 @@ exports.addProduct = async function (req, res, next) {
   // else
   //    save entry to OrderProduct
 }
+
 exports.removeProduct = async function (req, res, next) {
   // pass in orderId
   // pass in productId
 }
-exports.setQuantity = async function (req, res, next) {
-  // pass in orderId
-  // pass in productId
+
+exports.setQuantity = async function (orderId, productId, quantity) {
+  // validate orderId, productId, and quantity
+  // find entry with specified orderId and productId
+  // change quantity to specfied quantity
+  // save entry to OrderProduct
 }

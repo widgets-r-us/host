@@ -56,7 +56,7 @@ exports.createUser = async function(widgetsRUsUser) {
     var savedWidgetsRUsUser = await newWidgetsRUsUser.save()
     return savedWidgetsRUsUser
   } catch (e) {
-    throw Error(new WidgetsRUsError({
+    return new WidgetsRUsError(new WidgetsRUsError({
       context: "WidgetsRUsUsersDao#createUser",
       code: "widgetsRUsUsers/save",
       message: "There was an error creating the new user.",

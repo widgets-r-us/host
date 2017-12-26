@@ -1,40 +1,38 @@
 var ApiResponse = require('api-response').ApiResponse
 var OrdersDao = require('../daos/orders.dao')
 var WidgetsRUsModel = require('@widgets-r-us/model')
-var OrderProduct = WidgetsRUsModel.OrderProduct
+var OrderXProduct = WidgetsRUsModel.OrderXProduct
+var OrderValidator = WidgetsRUsModel.Validators.OrderValidator
 var Order = WidgetsRUsModel.Order
 var Product = WidgetsRUsModel.Product
 
-exports.getOrders = async function(req, res, next) {
+exports.getOrders = async function() {
   try {
-    var orders = await OrdersDao.readOrders()
-    return res.status(200).json({status: 200, data: orders})
+    let orders = await OrdersDao.readOrders()
+    return new ApiResponse(200, orders)
   } catch(e) {
-    return res.status(400).json({status: 400, message: e.message})
+    return new ApiResponse(400, e.message)
   }
 }
 
-exports.getMyOrder = async function(req, res, next) {
-  var widgetsRUsUserId = req.query.widgetsRUsUserId
-  // TODO(ajmed): validate order, for now do some poor man validation
-  if (!req.body.widgetsRUsUserId)
-    return new ApiResponse(400, "No widgetsRUsUserId was specified")
-
-  var page = req.query.page ? req.query.page : 1
-  var limit = req.query.limit ? req.query.limit : 1
+exports.getMyOrder = async function(widgetsRUsUserId) {
+  if (!widgetsRUsUserId)
+    return new ApiResponse(400, 'The specified widgetsRUsUserId was invalid.')
 
   try {
-    var orders = await OrdersDao.readOrders({}, page, limit)
-    return res.status(200).json({status: 200, data: orders})
+    let orders = await OrdersDao.readOrders()
+    return new ApiResponse(200, orders)
   } catch(e) {
-    return res.status(400).json({status: 400, message: e.message})
+    return new ApiResponse(400, e.message)
   }
 }
 
-exports.createOrder = async function(req, res, next) {
-  // TODO(ajmed): validate order, for now do some poor man validation
+exports.createOrder = async function(order) {
   if (!req.body.widgetsRUsUserId)
-    return res.status(400).json({status: 400, message: "No widgetsRUsUserId was specified"})
+    return new ApiResponse(400, 'No widgetsRUsUserId was specified')
+  let validation = OrderValidator.validate(order)
+  if (validation !== 'pass')
+    return new ApiResponse(400, new validation)
 
   var order = {
     widgetsRUsUserId: req.body.widgetsRUsUserId
@@ -73,7 +71,7 @@ exports.clearOrder = async function (req, res, next) {
 
 }
 
-exports.addProduct = async function (req, res, next) {
+exports.associateOrderAndProduct = async function (req, res, next) {
   // pass in orderId
   // pass in productId
   // find entry with orderId = inOrderId and productId = inProductId
@@ -83,7 +81,7 @@ exports.addProduct = async function (req, res, next) {
   //    save entry to OrderProduct
 }
 
-exports.removeProduct = async function (req, res, next) {
+exports.dissociateOrderAndProduct = async function (req, res, next) {
   // pass in orderId
   // pass in productId
 }

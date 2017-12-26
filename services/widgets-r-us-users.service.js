@@ -1,7 +1,7 @@
 var ApiResponse = require('api-response').ApiResponse
 var WidgetsRUsModel = require('@widgets-r-us/model')
 var WidgetsRUsUser = WidgetsRUsModel.WidgetsRUsUser
-var WidgetsRUsUserValidator = WidgetsRUsModel.WidgetsRUsUserValidator
+var WidgetsRUsUserValidator = WidgetsRUsModel.Validators.WidgetsRUsUserValidator
 var WidgetsRUsUsersDao = require('../daos/widgets-r-us-users.dao')
 
 exports.register = async function(username) {

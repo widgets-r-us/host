@@ -6,10 +6,10 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www.js"
   },
   "dependencies": {
-    "@widgets-r-us/model": "^1.1.11",
+    "@widgets-r-us/model": "^1.1.13",
     "bluebird": "^3.5.1",
     "body-parser": "~1.18.2",
     "cookie-parser": "~1.4.3",
@@ -19,7 +19,7 @@
     "mongoose": "^4.13.7",
     "mongoose-paginate": "^5.0.3",
     "morgan": "~1.9.0",
-    "nodemon": "^1.13.3",
+    "nodemon": "^1.14.3",
     "serve-favicon": "~2.4.5"
   }
 }

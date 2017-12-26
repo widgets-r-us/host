@@ -1,17 +1,18 @@
 var ApiResponse = require('api-response').ApiResponse
 var WidgetsRUsModel = require('@widgets-r-us/model')
-var WidgetValidator = WidgetsRUsModel.WidgetValidator
+var WidgetValidator = WidgetsRUsModel.Validators.WidgetValidator
 var Widget = WidgetsRUsModel.Widget
+var Product = WidgetsRUsModel.Product
 var WidgetAttribute = WidgetsRUsModel.WidgetAttribute
-var WidgetWidgetAttribute = WidgetsRUsModel.WidgetWidgetAttribute
+var WidgetWidgetAttribute = WidgetsRUsModel.WidgetXWidgetAttribute
 var WidgetCategory = WidgetsRUsModel.WidgetCategory
 var WidgetCategoryOption = WidgetsRUsModel.WidgetCategoryOption
-var WidgetWidgetCategoryOption = WidgetsRUsModel.WidgetWidgetCategoryOption
+var WidgetWidgetCategoryOption = WidgetsRUsModel.WidgetXWidgetCategoryOption
 
 let createWidget = async function(widget, isMerchandise, attributes, categoryOptions) {
   let validation = WidgetValidator.validate(widget, attributes, categoryOptions)
   if (validation !== 'pass')
-    return new ApiResponse(400, validation)
+    return new ApiResponse(400, new validation)
   // create widget entry
   // if we check 'is merchandise' then we should also create a product entry with this function
 }
@@ -25,9 +26,11 @@ let deleteWidget = async function(widgetId) {
   // find the product with merchandiseId = widgetId and remove
 }
 let associateWidgetAttributeWithWidget = async function(widgetId, attributeId) {
+  // check existence of attribute via Id and widget via Id
   // add entry to junction table WidgetXWidgetAttribute
 }
 let dissociateWidgetAttributeWithWidget = async function(widgetId, attributeId) {
+  // check existence of attribute via Id and widget via Id
   // remove entry to junction table WidgetXWidgetAttribute
 }
 let associateWidgetCategoryOptionWithWidget = async function(widgetId, widgetCategoryOptionId) {
@@ -44,30 +47,31 @@ let dissociateWidgetCategoryOptionWithWidget = async function(widgetId, widgetCa
  * @param widgetCategory: WidgetCategory
  * @returns {Promise.<void>}
  */
-let createWidgetCategory = async function() {
+let createWidgetCategory = async function(widgetCategory) {
 
 }
 /**
  * @param widgetCategoryId: number | widgetCategoryName: string
  * @returns {Promise.<void>}
  */
-let deleteWidgetCategory = async function() {
+let deleteWidgetCategory = async function(widgetCategoryId) {
 }
 /**
- *
  * @returns {Promise.<void>}
  */
-let createWidgetCategoryOption = async function() {
+let createWidgetCategoryOption = async function(widgetCategoryOption) {
+
 }
 /**
- *
+ * @param widgetCategoryOptionId: number
  * @returns {Promise.<void>}
  */
-let deleteWidgetCategoryOption = async function() {
+let deleteWidgetCategoryOption = async function(widgetCategoryOptionId) {
+  // if it's the last option in the category we should prolly delete the category as well?
 }
-let createWidgetAttribute = async function() {
+let createWidgetAttribute = async function(widgetAttribute) {
 }
-let deleteWidgetAttribute = async function() {
+let deleteWidgetAttribute = async function(widgetAttributeId) {
 }
 
 exports.createWidget = createWidget

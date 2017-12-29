@@ -14,22 +14,12 @@ var WidgetCategoryOption = WidgetsRUsModel.WidgetCategoryOption
 var WidgetXWidgetCategoryOption = WidgetsRUsModel.WidgetXWidgetCategoryOption
 
 var WidgetValidator = WidgetsRUsModel.Validators.WidgetValidator
+var WidgetAttributeValidator = WidgetsRUsModel.Validators.WidgetAttributeValidator
+var WidgetCategoryValidator = WidgetsRUsModel.Validators.WidgetCategoryValidator
+var WidgetCategoryOptionValidator = WidgetsRUsModel.Validators.WidgetCategoryOptionValidator
+var WidgetXWidgetAttributeValidator = WidgetsRUsModel.Validators.WidgetXWidgetAttributeValidator
+var WidgetXWidgetCategoryOptionValidator = WidgetsRUsModel.Validators.WidgetXWidgetCategoryOptionValidator
 
-let BaseValidator = {
-  validate: function(model) {
-    if (!model.matches(/^[A-z0-9\s~`@#$%^&*()_+=:,?\/-]{2,48}$/)) {
-      return 'Must only contain alphanumeric characters, spaces, and the following special characters: ' +
-          '~, `, !, @, #, $, %, ^, &, *, (, ), _, -, +, =, |, :, ,, ?, /.'
-    }
-  }
-}
-
-let ProductValidator = {validate: function(model) {}, validateSubset: function(model) {}}
-let WidgetCategoryValidator = {validate: function(model) {}, validateSubset: function(model) {}}
-let WidgetCategoryOptionValidator = {validate: function(model) {}, validateSubset: function(model) {}}
-let WidgetAttributeValidator = {validate: function(model) {}, validateSubset: function(model) {}}
-let WidgetXWidgetAttributeValidator = {validate: function(model) {}, validateSubset: function(model) {}}
-let WidgetXWidgetCategoryOptionValidator = {validate: function(model) {}, validateSubset: function(model) {}}
 
 let createWidget = async function(widget, isMerchandise, product, attributes, categoryOptions) {
   // we have to make the widget first and then we save the product and tie with product's merchandise id to this

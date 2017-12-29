@@ -9,17 +9,18 @@
     "start": "node ./bin/www.js"
   },
   "dependencies": {
-    "@widgets-r-us/model": "^1.1.13",
+    "@widgets-r-us/model": "^1.1.14",
     "bluebird": "^3.5.1",
     "body-parser": "~1.18.2",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "ejs": "~2.5.7",
     "express": "~4.15.5",
-    "mongoose": "^4.13.7",
+    "mongoose": "^4.13.8",
     "mongoose-paginate": "^5.0.3",
     "morgan": "~1.9.0",
-    "nodemon": "^1.14.3",
-    "serve-favicon": "~2.4.5"
+    "nodemon": "^1.14.6",
+    "serve-favicon": "~2.4.5",
+    "validator": "^9.2.0"
   }
 }

@@ -2,14 +2,17 @@ var ApiResponse = require('api-response').ApiResponse
 var OrdersDao = require('../daos/orders.dao')
 var BaseService = require('base.service')
 var BaseDao = require('../daos/base.dao')
+
 var WidgetsRUsModel = require('@widgets-r-us/model')
+
 var OrderXProduct = WidgetsRUsModel.OrderXProduct
-var OrderValidator = WidgetsRUsModel.Validators.OrderValidator
 var Order = WidgetsRUsModel.Order
 var Product = WidgetsRUsModel.Product
 
-// validator validates that these are mongoIds
-let OrderXProductValidator = {validate: function(model) {}, validateSubset: function() {}}
+var OrderValidator = WidgetsRUsModel.Validators.OrderValidator
+var WidgetValidator = WidgetsRUsModel.Validators.WidgetValidator
+var OrderXProductValidator = WidgetsRUsModel.Validators.OrderXProductValidator
+
 
 exports.getOrders = async function() {
   try {

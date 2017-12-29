@@ -1,94 +1,77 @@
 var ApiResponse = require('api-response').ApiResponse
 var OrdersDao = require('../daos/orders.dao')
+var BaseService = require('base.service')
+var BaseDao = require('../daos/base.dao')
 var WidgetsRUsModel = require('@widgets-r-us/model')
 var OrderXProduct = WidgetsRUsModel.OrderXProduct
 var OrderValidator = WidgetsRUsModel.Validators.OrderValidator
 var Order = WidgetsRUsModel.Order
 var Product = WidgetsRUsModel.Product
 
+// validator validates that these are mongoIds
+let OrderXProductValidator = {validate: function(model) {}, validateSubset: function() {}}
+
 exports.getOrders = async function() {
   try {
     let orders = await OrdersDao.readOrders()
     return new ApiResponse(200, orders)
   } catch(e) {
-    return new ApiResponse(400, e.message)
+    return new ApiResponse(500, e.message)
   }
 }
 
 exports.getMyOrder = async function(widgetsRUsUserId) {
-  if (!widgetsRUsUserId)
-    return new ApiResponse(400, 'The specified widgetsRUsUserId was invalid.')
+  let validation = OrderValidator.validateSubset({widgetsRUsUserId: widgetsRUsUserId})
+  if (validation !== 'pass')
+    return new ApiResponse(400, validation)
 
   try {
-    let orders = await OrdersDao.readOrders()
-    return new ApiResponse(200, orders)
+    let order = await Order.where({widgetsRUsUserId: widgetsRUsUserId})
+    let orderXProducts = await OrderXProduct.where({orderId: order._id})
+    let products = []
+    for (const orderXProduct of orderXProducts) {
+      products.push(await Product.findById(orderXProduct.productId))
+    }
+    return new ApiResponse(200, {products: products})
   } catch(e) {
-    return new ApiResponse(400, e.message)
+    return new ApiResponse(500, e.message)
   }
 }
 
 exports.createOrder = async function(order) {
-  if (!req.body.widgetsRUsUserId)
-    return new ApiResponse(400, 'No widgetsRUsUserId was specified')
-  let validation = OrderValidator.validate(order)
+  return await BaseService.baseCreate(order, OrderValidator)
+}
+
+exports.updateOrder = async function(orderId, widgetsRUsUserId) {
+  let validation = OrderValidator.validateSubset({widgetsRUsUserId: widgetsRUsUserId})
   if (validation !== 'pass')
-    return new ApiResponse(400, new validation)
+    return new ApiResponse(400, validation)
 
-  var order = {
-    widgetsRUsUserId: req.body.widgetsRUsUserId
-  }
   try {
-    var createdOrder = await OrdersDao.createOrder(order)
-    return res.status(201).json({status: 201, data: createdOrder})
+    await Order.update({_id: orderId}, {$set: {widgetsRUsUserId: widgetsRUsUserId}})
+    return new ApiResponse(204, {})
   } catch(e) {
-    return res.status(400).json({status: 400, message: e.message})
+    return new ApiResponse(500, e.message)
   }
 }
 
-exports.updateOrder = async function(req, res, next) {
-  // TODO(ajmed): validate order, for now do some poor man validation
-  if (!req.body._id)
-    return res.status(400).json({status: 400, message: "No _id was specified"})
-  else if (!req.body.widgetsRUsUserId)
-    return res.status(400).json({status: 400, message: "No widgetsRUsUserId was specified"})
+exports.clearOrder = async function(orderId) {
+  return await BaseService.baseDeleteByWhereClause(OrderXProduct, {orderId: orderId}, OrderXProductValidator)
+}
 
-  var order = {
-    _id: req.body._id,
-    widgetsRUsUserId: req.body.widgetsRUsUserId
-  }
+exports.associateOrderAndProduct = async function(orderId, productId) {
+  return await BaseService.baseCreate(new OrderXProduct({orderId: orderId, productId: productId, quantity: 1}), OrderXProductValidator)
+}
+
+exports.dissociateOrderAndProduct = async function(orderId, productId) {
+  return await BaseService.baseDeleteByWhereClause(OrderXProduct, {orderId: orderId, productId: productId}, OrderXProductValidator)
+}
+
+exports.setQuantity = async function(orderId, productId, quantity) {
   try {
-    var createdOrder = await OrdersDao.createOrder(order)
-    return res.status(201).json({status: 201, data: createdOrder})
+    await OrderXProduct.update({orderId: orderId, productId: productId}, {$set: {quantity: quantity}})
+    return new ApiResponse(204, {})
   } catch(e) {
-    return res.status(400).json({status: 400, message: e.message})
+    return new ApiResponse(500, e.message)
   }
-}
-
-exports.clearOrder = async function (req, res, next) {
-  // if we're clearing an order we need to remove all the productIds associated
-  // with this orderId
-  // find and remove all OrderProduct entries where orderId = inOrderId
-
-}
-
-exports.associateOrderAndProduct = async function (req, res, next) {
-  // pass in orderId
-  // pass in productId
-  // find entry with orderId = inOrderId and productId = inProductId
-  // if exists
-  //    increment quantity
-  // else
-  //    save entry to OrderProduct
-}
-
-exports.dissociateOrderAndProduct = async function (req, res, next) {
-  // pass in orderId
-  // pass in productId
-}
-
-exports.setQuantity = async function (orderId, productId, quantity) {
-  // validate orderId, productId, and quantity
-  // find entry with specified orderId and productId
-  // change quantity to specfied quantity
-  // save entry to OrderProduct
 }

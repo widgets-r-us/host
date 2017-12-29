@@ -106,7 +106,7 @@ router.delete('/deleteWidgetCategoryOption', async function(req, res, next) {
 })
 
 router.post('/createWidgetAttribute', async function(req, res, next) {
-  let widgetCategoryOptionId = req.body.widgetAttribute
+  let widgetAttribute = req.body.widgetAttribute
   let apiResponse = await WidgetService.deleteWidgetCategoryOption(widgetAttribute)
   return res.status(apiResponse.status).json(apiResponse)
 })

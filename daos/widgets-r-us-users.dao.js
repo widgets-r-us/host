@@ -4,7 +4,7 @@ var WidgetsRUsError = WidgetsRUsModel.WidgetsRUsError
 
 exports.readUserByUsername = async function(widgetsRUsUser) {
   try {
-    var foundWidgetsRUsUser = await WidgetsRUsUser.findOne({username: widgetsRUsUser.username})
+    let foundWidgetsRUsUser = await WidgetsRUsUser.findOne({username: widgetsRUsUser.username})
     if (foundWidgetsRUsUser.length)
       return foundWidgetsRUsUser
     else
@@ -26,7 +26,7 @@ exports.readUserByUsername = async function(widgetsRUsUser) {
 
 exports.exists = async function(widgetsRUsUser) {
   try {
-    var foundWidgetsRUsUser = await WidgetsRUsUser.findOne({username: widgetsRUsUser.username})
+    let foundWidgetsRUsUser = await WidgetsRUsUser.findOne({username: widgetsRUsUser.username})
     return foundWidgetsRUsUser.length > 0
   } catch (e) {
     throw Error(new WidgetsRUsError({
@@ -39,12 +39,12 @@ exports.exists = async function(widgetsRUsUser) {
 }
 
 exports.createUser = async function(widgetsRUsUser) {
-  var newWidgetsRUsUser = new WidgetsRUsUser({
+  let newWidgetsRUsUser = new WidgetsRUsUser({
     username: widgetsRUsUser.username
   })
 
   try {
-    var foundWidgetsRUsUser = await WidgetsRUsUser.findOne({username: widgetsRUsUser.username})
+    let foundWidgetsRUsUser = await WidgetsRUsUser.findOne({username: widgetsRUsUser.username})
     if (foundWidgetsRUsUser.length)
       return new WidgetsRUsError({
         context: "WidgetsRUsUsersDao#createUser",
@@ -53,7 +53,7 @@ exports.createUser = async function(widgetsRUsUser) {
         data: {e: e, input: {widgetsRUsUser: widgetsRUsUser}},
       })
 
-    var savedWidgetsRUsUser = await newWidgetsRUsUser.save()
+    let savedWidgetsRUsUser = await newWidgetsRUsUser.save()
     return savedWidgetsRUsUser
   } catch (e) {
     return new WidgetsRUsError(new WidgetsRUsError({

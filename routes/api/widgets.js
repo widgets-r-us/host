@@ -12,6 +12,12 @@ router.post('/createWidget', async function(req, res, next) {
   return res.status(apiResponse.status).json(apiResponse)
 })
 
+router.get('/getWidget', async function(req, res, next) {
+  let widgetId = req.query.widgetId
+  let apiResponse = await WidgetService.getWidget(widgetId)
+  return res.status(apiResponse.status).json(apiResponse)
+})
+
 router.get('/searchWidgets', async function(req, res, next) {
   let widget = req.body.widget
   let isMerchandise = req.body.isMerchandise
@@ -33,10 +39,7 @@ router.post('/updateWidget', async function(req, res, next) {
 })
 
 router.delete('/deleteWidget', async function(req, res, next) {
-  let widget = req.body.widget
-  let isMerchandise = req.body.isMerchandise
-  let attributes = req.body.attributes
-  let categoryOptions = req.body.categoryOptions
+  let widgetId = req.body.widgetId
   let apiResponse = await WidgetService.deleteWidget(widgetId)
   return res.status(apiResponse.status).json(apiResponse)
 })
@@ -73,23 +76,20 @@ router.post('/dissociateWidgetCategoryOptionWithWidget', async function(req, res
   return res.status(apiResponse.status).json(apiResponse)
 })
 
-router.post('/dissociateWidgetCategoryOptionWithWidget', async function(req, res, next) {
-  let widgetId = req.body.widgetId
-  let widgetCategoryOptionId = req.body.widgetCategoryOptionId
-  let apiResponse = await
-      WidgetService.dissociateWidgetCategoryOptionWithWidget(widgetId, widgetCategoryOptionId)
-  return res.status(apiResponse.status).json(apiResponse)
-})
-
 router.post('/createWidgetCategory', async function(req, res, next) {
   let widgetCategory = req.body.widgetCategory
   let apiResponse = await WidgetService.createWidgetCategory(widgetCategory)
   return res.status(apiResponse.status).json(apiResponse)
 })
 
+router.get('/getWidgetCategoriesAndOptions', async function(req, res, next) {
+  let apiResponse = await WidgetService.getWidgetCategoriesAndOptions()
+  return res.status(apiResponse.status).json(apiResponse)
+})
+
 router.delete('/deleteWidgetCategory', async function(req, res, next) {
-  let widgetCategory = req.body.widgetCategory
-  let apiResponse = await WidgetService.deleteWidgetCategory(widgetCategory)
+  let widgetCategoryId = req.body.widgetCategoryId
+  let apiResponse = await WidgetService.deleteWidgetCategory(widgetCategoryId)
   return res.status(apiResponse.status).json(apiResponse)
 })
 
@@ -107,7 +107,7 @@ router.delete('/deleteWidgetCategoryOption', async function(req, res, next) {
 
 router.post('/createWidgetAttribute', async function(req, res, next) {
   let widgetAttribute = req.body.widgetAttribute
-  let apiResponse = await WidgetService.deleteWidgetCategoryOption(widgetAttribute)
+  let apiResponse = await WidgetService.createWidgetCategoryOption(widgetAttribute)
   return res.status(apiResponse.status).json(apiResponse)
 })
 

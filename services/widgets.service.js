@@ -57,7 +57,7 @@ let createWidget = async function(widget, isMerchandise, product, attributes, ca
   }
   for (const categoryOption of categoryOptions) {
     let widgetXWidgetCategoryOption = new WidgetXWidgetCategoryOption({widgetId: savedWidget._id,
-      widgetCategoryOptionIdId: categoryOption._id})
+      widgetCategoryOptionId: categoryOption._id})
     await widgetXWidgetCategoryOption.save()
   }
 
@@ -67,6 +67,27 @@ let createWidget = async function(widget, isMerchandise, product, attributes, ca
   }
   return new ApiResponse(200, savedWidget)
 }
+
+let getWidget = async function(widgetId) {
+  let widget = await Widget.find({_id: widgetId})
+  widget['attributes'] = await WidgetXWidgetAttribute.find({widgetId: widgetId})
+  for (const widgetXWidgetAttribute of widget['attributes']) {
+    widgetXWidgetAttribute['widgetAttribute'] = await WidgetAttribute.find({_id: widgetXWidgetAttribute.widgetAttributeId})
+  }
+  widget['categories'] = await WidgetXWidgetCategoryOption.find({widgetId: widgetId})
+  for (const widgetXWidgetCategoryOption of widget['categories']) {
+    widgetXWidgetCategoryOption['widgetCategoryOption'] = await WidgetCategoryOption.find({_id: widgetXWidgetCategoryOption.widgetCategoryOptionId})
+    let child = widgetXWidgetCategoryOption['widgetCategoryOption']
+    while (child.parentId) {
+      let parentWidgetCategory = await WidgetCategory.find({_id: child.parentId})
+      parentWidgetCategory['child'] = child
+      widgetXWidgetCategoryOption['widgetCategoryOption'] = parentWidgetCategory
+      child = parentWidgetCategory
+    }
+  }
+  return new ApiResponse(200, {widget: widget})
+}
+
 let searchWidgets = async function(widget, isMerchandise, attributes, categoryOptions) {
   // search by a name, attribute, category (key) and a value?
 }
@@ -76,32 +97,16 @@ let updateWidget = async function(widget, isMerchandise, attributes, categoryOpt
 }
 
 let deleteWidget = async function(widgetId) {
-  // find and remove widget by ID
-  // find the products with merchandiseId = widgetId and remove
-  // find any entries in OrderXProduct table and remove the entries tied to this product
-  try {
-    let products = await Product.find({merchandiseId: widgetId})
-    for (const product of products) {
-      // TODO(ajmed): check success/error of these removals
-      let orderXProductDeletion = await OrderXProduct.remove({productId: product._id})
-      let removal = await product.remove()
-    }
-    await WidgetXWidgetAttribute.remove({widgetId: widgetId})
-    await WidgetXWidgetCategoryOption.remove({widgetId: widgetId})
-  } catch(e) {
-    return new ApiResponse(500, new WidgetsRUsError({
-      context: "WidgetService#deleteWidget",
-      code: "widget/delete",
-      message: "There was an error deleting the widget while deleting the products or product/order entries.",
-      data: {e: e, input: {widgetId: widgetId}},
-    }))
-  }
   return await BaseService.baseDeleteById(Widget, widgetId, WidgetValidator)
 }
 
 
 let createWidgetAttribute = async function(widgetAttribute) {
   return await BaseService.baseCreate(widgetAttribute, WidgetAttributeValidator)
+}
+
+let getWidgetAttributes = async function() {
+  return new ApiResponse(200, {attributes: await WidgetAttribute.find()})
 }
 
 let deleteWidgetAttribute = async function(widgetAttributeId) {
@@ -130,6 +135,31 @@ let deleteWidgetCategory = async function(widgetCategoryId) {
 let createWidgetCategoryOption = async function(widgetCategoryOption) {
   return await BaseService.baseCreate(widgetCategoryOption, WidgetCategoryOptionValidator)
 }
+
+let recursiveBuildCategoryTree = async function(rootCategories, optionsIndex) {
+  for (const category of rootCategories) {
+    let widgetCategories = await WidgetCategory.find({parentId: category._id})
+    category['children'] = widgetCategories
+    await recursiveBuildCategoryTree(widgetCategories, optionsIndex)
+    category['children'].concat(optionsIndex[category._id])
+  }
+}
+
+let getWidgetCategoriesAndOptions = async function() {
+  let rootWidgetCategories = await WidgetCategory.find({parentId: null})
+  let widgetCategoryOptions = await WidgetCategoryOption.find()
+  let tree = {root: rootWidgetCategories}
+  let optionsIndex = {}
+  for (const widgetCategoryOption of widgetCategoryOptions) {
+    if (optionsIndex[widgetCategoryOption.parentId])
+      optionsIndex[widgetCategoryOption.parentId].push(widgetCategoryOption)
+    else
+      optionsIndex[widgetCategoryOption.parentId] = [widgetCategoryOption]
+  }
+  await recursiveBuildCategoryTree(tree.root, optionsIndex)
+  return new ApiResponse(200, {categoryTree: tree})
+}
+
 /**
  * @param widgetCategoryOptionId: number
  * @returns {Promise.<void>}
@@ -171,6 +201,7 @@ let dissociateWidgetCategoryOptionWithWidget = async function(widgetId, widgetCa
 }
 
 exports.createWidget = createWidget
+exports.getWidget = getWidget
 exports.searchWidgets = searchWidgets
 exports.updateWidget = updateWidget
 exports.deleteWidget = deleteWidget
@@ -179,8 +210,10 @@ exports.dissociateWidgetAttributeWithWidget = dissociateWidgetAttributeWithWidge
 exports.associateWidgetCategoryOptionWithWidget = associateWidgetCategoryOptionWithWidget
 exports.dissociateWidgetCategoryOptionWithWidget = dissociateWidgetCategoryOptionWithWidget
 exports.createWidgetCategory = createWidgetCategory
+exports.getWidgetCategoriesAndOptions = getWidgetCategoriesAndOptions
 exports.deleteWidgetCategory = deleteWidgetCategory
 exports.createWidgetCategoryOption = createWidgetCategoryOption
 exports.deleteWidgetCategoryOption = deleteWidgetCategoryOption
 exports.createWidgetAttribute = createWidgetAttribute
+exports.getWidgetAttributes = getWidgetAttributes
 exports.deleteWidgetAttribute = deleteWidgetAttribute

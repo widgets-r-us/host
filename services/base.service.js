@@ -1,4 +1,4 @@
-var ApiResponse = require('api-response').ApiResponse
+var ApiResponse = require('./api-response').ApiResponse
 var BaseDao = require('../daos/base.dao')
 var WidgetsRUsModel = require('@widgets-r-us/model')
 var WidgetsRUsError = WidgetsRUsModel.WidgetsRUsError

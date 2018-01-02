@@ -11,7 +11,7 @@ var api = require('./routes/api')
 var app = express()
 var bluebird = require('bluebird')
 var mongoose = require('mongoose')
-var databaseUrl = 'mongodb://localhost:27017/widgets-r-us-database'
+var databaseUrl = 'mongodb://localhost:27017/widgets-r-us'
 
 // Database connection
 mongoose.Promise = bluebird
@@ -20,15 +20,12 @@ mongoose.connect(databaseUrl, { useMongoClient: true })
   .catch(() => { console.log(`Error connecting to database as url: ${databaseUrl}`) })
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
-
-app.use('/', index)
-app.use('/api', api)
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*")
@@ -36,6 +33,9 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
   next()
 })
+
+app.use('/', index)
+app.use('/api', api)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

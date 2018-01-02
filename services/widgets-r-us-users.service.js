@@ -1,6 +1,7 @@
-var ApiResponse = require('api-response').ApiResponse
+var ApiResponse = require('./api-response').ApiResponse
 var WidgetsRUsModel = require('@widgets-r-us/model')
 var WidgetsRUsUser = WidgetsRUsModel.WidgetsRUsUser
+var WidgetsRUsError = WidgetsRUsModel.WidgetsRUsError
 var WidgetsRUsUserValidator = WidgetsRUsModel.Validators.WidgetsRUsUserValidator
 var WidgetsRUsUsersDao = require('../daos/widgets-r-us-users.dao')
 
@@ -14,12 +15,12 @@ exports.register = async function(username) {
     var createdWidgetsRUsUser = await WidgetsRUsUsersDao.createUser(widgetsRUsUser)
 
     // if createUser returned an error, return http 400
-    if (createdWidgetsRUsUser['context'] && createdWidgetsRUsUser['code'] && createdWidgetsRUsUser['message'])
-      return new ApiResponse(400, widgetsRUsUser.message)
+    if (createdWidgetsRUsUser instanceof WidgetsRUsError)
+      return new ApiResponse(400, createdWidgetsRUsUser)
     else
       return new ApiResponse(201, createdWidgetsRUsUser)
   } catch(e) {
-    return new ApiResponse(400, e.message)
+    return new ApiResponse(500, e.message)
   }
 }
 
@@ -32,12 +33,12 @@ exports.login = async function(username) {
     var widgetsRUsUser = await WidgetsRUsUsersDao.readUserByUsername(username)
 
     // if readUserByUsername returned an error, return http 400
-    if (widgetsRUsUser['context'] && widgetsRUsUser['code'] && widgetsRUsUser['message'])
+    if (widgetsRUsUser instanceof WidgetsRUsError)
       return new ApiResponse(400, widgetsRUsUser.message)
     else
       return new ApiResponse(200, widgetsRUsUser)
   } catch(e) {
-    return new ApiResponse(400, e.message)
+    return new ApiResponse(500, e)
   }
 }
 

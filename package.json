@@ -9,7 +9,7 @@
     "start": "node ./bin/www.js"
   },
   "dependencies": {
-    "@widgets-r-us/model": "^1.1.14",
+    "@widgets-r-us/model": "^1.1.15",
     "bluebird": "^3.5.1",
     "body-parser": "~1.18.2",
     "cookie-parser": "~1.4.3",

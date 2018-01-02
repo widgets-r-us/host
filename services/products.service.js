@@ -1,4 +1,4 @@
-var ApiResponse = require('api-response').ApiResponse
+var ApiResponse = require('./api-response').ApiResponse
 var WidgetsRUsModel = require('@widgets-r-us/model')
 var Product = WidgetsRUsModel.Product
 

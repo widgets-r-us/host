@@ -1,6 +1,6 @@
-var ApiResponse = require('api-response').ApiResponse
+var ApiResponse = require('./api-response').ApiResponse
 var OrdersDao = require('../daos/orders.dao')
-var BaseService = require('base.service')
+var BaseService = require('./base.service')
 var BaseDao = require('../daos/base.dao')
 
 var WidgetsRUsModel = require('@widgets-r-us/model')

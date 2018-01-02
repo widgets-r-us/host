@@ -3,8 +3,9 @@ var router = express.Router()
 var WidgetsRUsUsersService = require('../../services/widgets-r-us-users.service')
 
 router.post('/register', async function(req, res, next) {
+  console.log(req.body.username)
   let username = req.body.username
-  let apiResponse = WidgetsRUsUsersService.register(username)
+  let apiResponse = await WidgetsRUsUsersService.register(username)
   return res.status(apiResponse.status).json(apiResponse)
 })
 

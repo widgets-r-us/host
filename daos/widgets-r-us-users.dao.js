@@ -5,15 +5,16 @@ var WidgetsRUsError = WidgetsRUsModel.WidgetsRUsError
 exports.readUserByUsername = async function(username) {
   try {
     let foundWidgetsRUsUser = await WidgetsRUsUser.findOne({username: username})
-    if (foundWidgetsRUsUser)
+    if (foundWidgetsRUsUser) {
       return foundWidgetsRUsUser
-    else
+    } else {
       return new WidgetsRUsError({
         context: "WidgetsRUsUsersDao#readUserByUsername",
         code: "widgetsRUsUsers/no-user-exists",
         message: "The specified username has not been registered.",
-        data: {e: e, input: {username: username}},
+        data: {input: {username: username}},
       })
+    }
   } catch (e) {
     throw new WidgetsRUsError({
       context: "WidgetsRUsUsersDao#readUserByUsername",

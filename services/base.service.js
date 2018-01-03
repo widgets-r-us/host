@@ -6,13 +6,15 @@ var WidgetsRUsError = WidgetsRUsModel.WidgetsRUsError
 let baseCreate = async function(model, validator) {
   if (validator) {
     let validation = validator.validate(model)
-    if (validation !== 'pass')
+    if (validation !== 'pass') {
+      console.log(validation)
       return new ApiResponse(400, new WidgetsRUsError({
         context: "BaseService#baseCreate",
         code: "model/create-invalid",
-        message: "The model wasn't valid as specified by the input validator",
-        data: {e: e, input: {model: model, validator: validator}},
+        message: JSON.stringify(validation),
+        data: {input: {model: model, validator: validator}},
       }))
+    }
   }
 
   let message = await BaseDao.createModel(model, validator)

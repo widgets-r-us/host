@@ -13,6 +13,7 @@ var WidgetCategory = WidgetsRUsModel.WidgetCategory
 var WidgetCategoryOption = WidgetsRUsModel.WidgetCategoryOption
 var WidgetXWidgetCategoryOption = WidgetsRUsModel.WidgetXWidgetCategoryOption
 
+var ProductValidator = WidgetsRUsModel.Validators.ProductValidator
 var WidgetValidator = WidgetsRUsModel.Validators.WidgetValidator
 var WidgetAttributeValidator = WidgetsRUsModel.Validators.WidgetAttributeValidator
 var WidgetCategoryValidator = WidgetsRUsModel.Validators.WidgetCategoryValidator
@@ -118,7 +119,8 @@ let deleteWidgetAttribute = async function(widgetAttributeId) {
  * @returns {Promise.<void>}
  */
 let createWidgetCategory = async function(widgetCategory) {
-  return await BaseService.baseCreate(widgetCategory, WidgetCategoryValidator)
+  let completeWidgetCategory = new WidgetCategory({widgetCategory: widgetCategory})
+  return await BaseService.baseCreate(completeWidgetCategory, WidgetCategoryValidator)
 }
 
 /**

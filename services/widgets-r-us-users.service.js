@@ -30,11 +30,12 @@ exports.login = async function(username) {
     return new ApiResponse(400, validation)
 
   try {
-    var widgetsRUsUser = await WidgetsRUsUsersDao.readUserByUsername(username)
+    let widgetsRUsUser = await WidgetsRUsUsersDao.readUserByUsername(username)
+    console.log(widgetsRUsUser)
 
     // if readUserByUsername returned an error, return http 400
     if (widgetsRUsUser instanceof WidgetsRUsError)
-      return new ApiResponse(400, widgetsRUsUser.message)
+      return new ApiResponse(400, widgetsRUsUser)
     else
       return new ApiResponse(200, widgetsRUsUser)
   } catch(e) {

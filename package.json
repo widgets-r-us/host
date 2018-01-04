@@ -9,7 +9,7 @@
     "start": "node ./bin/www.js"
   },
   "dependencies": {
-    "@widgets-r-us/model": "^1.1.15",
+    "@widgets-r-us/model": "^1.1.27",
     "bluebird": "^3.5.1",
     "body-parser": "~1.18.2",
     "cookie-parser": "~1.4.3",
@@ -19,7 +19,7 @@
     "mongoose": "^4.13.8",
     "mongoose-paginate": "^5.0.3",
     "morgan": "~1.9.0",
-    "nodemon": "^1.14.6",
+    "nodemon": "^1.14.7",
     "serve-favicon": "~2.4.5"
   }
 }

@@ -1,3 +1,5 @@
+import {Product, Widget} from "../web-client/src/app/models";
+
 var express = require('express')
 var path = require('path')
 var favicon = require('serve-favicon')
@@ -18,6 +20,46 @@ mongoose.Promise = bluebird
 mongoose.connect(databaseUrl, { useMongoClient: true })
   .then(() => { console.log(`Successfully connected to the mongodb database at url: ${databaseUrl}`)})
   .catch(() => { console.log(`Error connecting to database as url: ${databaseUrl}`) })
+
+
+let initializeDatabase = async function () {
+  var WidgetsRUsModel = require('@widgets-r-us/model')
+  var WidgetService = require('./services/widgets.service')
+  var Widget = WidgetsRUsModel.Widget
+  var Product = WidgetsRUsModel.Product
+  var WidgetCategory = WidgetsRUsModel.WidgetCategory
+  var WidgetCategoryOption = WidgetsRUsModel.WidgetCategoryOption
+  var WidgetAttribute = WidgetsRUsModel.WidgetAttribute
+  var WidgetXWidgetAttribute = WidgetsRUsModel.WidgetXWidgetAttribute
+  var WidgetXWidgetCategoryOption = WidgetsRUsModel.WidgetXWidgetCategoryOption
+
+  let rootWidgetCategory = new WidgetCategory({widgetCategory: 'reservedRootWidgetCategory'})
+  rootWidgetCategory.parentId = rootWidgetCategory._id
+  rootWidgetCategory = await rootWidgetCategory.save()
+  let sizeWidgetCategory = await new WidgetCategory({parentId: rootWidgetCategory._id, widgetCategory: 'Size'}).save()
+  let finishWidgetCategory = await new WidgetCategory({parentId: rootWidgetCategory._id, widgetCategory: 'Finish'}).save()
+  let typeWidgetCategory = await new WidgetCategory({parentId: rootWidgetCategory._id, widgetCategory: 'Type'}).save()
+
+  let infinitesimalWidgetCategoryOption = await new WidgetCategoryOption({parentId: sizeWidgetCategory._id, widgetCategoryOption: 'Infinitesimal'}).save()
+  let woodWidgetCategoryOption = await new WidgetCategoryOption({parentId: finishWidgetCategory._id, widgetCategoryOption: 'Wood'}).save()
+  let chromeWidgetCategoryOption = await new WidgetCategoryOption({parentId: finishWidgetCategory._id, widgetCategoryOption: 'Chrome'}).save()
+  let diabolicalWidgetCategoryOption = await new WidgetCategoryOption({parentId: typeWidgetCategory._id, widgetCategoryOption: 'Diabolical'}).save()
+
+  let hauntedAttribute = await new WidgetAttribute({widgetAttribute: 'Haunted'}).save()
+  let quitePleasant = await new WidgetAttribute({widgetAttribute: 'Quite pleasant'}).save()
+
+  let babysFirstWidget = new Widget({widget: 'Baby\'s first widget'})
+  /*let widgetXWidgetAttribute = await new WidgetXWidgetAttribute({widgetAttributeId: quitePleasant._id, widgetId: babysFirstWidget._id}).save()*/
+  /*let WidgetXWidgetCategoryOption = await new WidgetXWidgetCategoryOption({widgetId: babysFirstWidget._id, widgetCategoryOption: infinitesimalWidgetCategoryOption._id})*/
+  let babysFirstProduct = new Product({merchandiseId: babysFirstWidget._id, name: "Baby's first widget", quantity: 100, price: 50})
+  let apiResponse = await WidgetService.createWidget(babysFirstWidget,
+      true,
+      babysFirstProduct,
+      [quitePleasant],
+      [infinitesimalWidgetCategoryOption, woodWidgetCategoryOption, diabolicalWidgetCategoryOption]
+  )
+
+}
 
 // uncomment after placing your favicon in /public
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

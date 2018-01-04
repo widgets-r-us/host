@@ -2,13 +2,13 @@ var ApiResponse = require('../services/api-response').ApiResponse
 var WidgetsRUsModel = require('@widgets-r-us/model')
 var WidgetsRUsError = WidgetsRUsModel.WidgetsRUsError
 
-let createModel = async function(modelType, model) {
+let createModel = async function(model) {
   try {
     return await model.save()
   } catch(e) {
     return new WidgetsRUsError({
       context: "BaseDao#createModel",
-      code: "model/create",
+      code: "model/create-invalid",
       message: "There was an error saving the model",
       data: {e: e, input: {model: model}},
     })
@@ -25,7 +25,7 @@ let readById = async function(modelType, id, isLean) {
         context: "BaseDao#readById",
         code: "model/not-found",
         message: "There was an error while reading the specified model",
-        data: {e: e, input: {modelType: modelType, modelId: id, lean: isLean}},
+        data: {input: {modelType: modelType, modelId: id, lean: isLean}},
       })
   } catch(e) {
     return new WidgetsRUsError({
@@ -47,7 +47,7 @@ let deleteModelByWhereClause = async function(modelType, whereClause) {
         context: "BaseDao#deleteModelWithId",
         code: "model/not-found",
         message: "The specified model does not exist.",
-        data: {e: e, input: {model: modelType, id: id}},
+        data: {input: {model: modelType, id: id}},
       })
   } catch (e) {
     return new WidgetsRUsError({

@@ -52,14 +52,10 @@ let createWidget = async function(widget, isMerchandise, product, attributes, ca
   // implement two-phase commit
   let savedWidget = await widget.save()
   for (const attribute of attributes) {
-    let widgetXWidgetAttribute = new WidgetXWidgetAttribute({widgetId: savedWidget._id,
-      widgetAttributeId: attribute._id})
-    await widgetXWidgetAttribute.save()
+    await new WidgetXWidgetAttribute({widgetId: savedWidget._id, widgetAttributeId: attribute._id}).save()
   }
   for (const categoryOption of categoryOptions) {
-    let widgetXWidgetCategoryOption = new WidgetXWidgetCategoryOption({widgetId: savedWidget._id,
-      widgetCategoryOptionId: categoryOption._id})
-    await widgetXWidgetCategoryOption.save()
+    await new WidgetXWidgetCategoryOption({widgetId: savedWidget._id, widgetCategoryOptionId: categoryOption._id}).save()
   }
 
   if (isMerchandise) {
@@ -71,18 +67,17 @@ let createWidget = async function(widget, isMerchandise, product, attributes, ca
 
 let getWidget = async function(widgetId) {
   let widget = await Widget.find({_id: widgetId})
-  widget['attributes'] = await WidgetXWidgetAttribute.find({widgetId: widgetId})
+  widget.attributes = await WidgetXWidgetAttribute.find({widgetId: widgetId})
   for (const widgetXWidgetAttribute of widget['attributes']) {
     widgetXWidgetAttribute['widgetAttribute'] = await WidgetAttribute.find({_id: widgetXWidgetAttribute.widgetAttributeId})
   }
-  widget['categories'] = await WidgetXWidgetCategoryOption.find({widgetId: widgetId})
-  for (const widgetXWidgetCategoryOption of widget['categories']) {
-    widgetXWidgetCategoryOption['widgetCategoryOption'] = await WidgetCategoryOption.find({_id: widgetXWidgetCategoryOption.widgetCategoryOptionId})
-    let child = widgetXWidgetCategoryOption['widgetCategoryOption']
-    while (child.parentId) {
+  widget.categories = await WidgetXWidgetCategoryOption.find({widgetId: widgetId})
+  for (const widgetXWidgetCategoryOption of widget.categories) {
+    widgetXWidgetCategoryOption.widgetCategoryOption = await WidgetCategoryOption.find({_id: widgetXWidgetCategoryOption.widgetCategoryOptionId})
+    let child = widgetXWidgetCategoryOption.widgetCategoryOption
+    while (child.widgetCategory !== 'reservedRootWidgetCategory') {
       let parentWidgetCategory = await WidgetCategory.find({_id: child.parentId})
-      parentWidgetCategory['child'] = child
-      widgetXWidgetCategoryOption['widgetCategoryOption'] = parentWidgetCategory
+      parentWidgetCategory.child = child
       child = parentWidgetCategory
     }
   }

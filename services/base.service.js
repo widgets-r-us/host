@@ -17,7 +17,7 @@ let baseCreate = async function(model, validator) {
     }
   }
 
-  let message = await BaseDao.createModel(model, validator)
+  let message = await BaseDao.createModel(model)
   if (message instanceof WidgetsRUsError) {
     if (message.code === "model/create-invalid")
       return new ApiResponse(400, message)

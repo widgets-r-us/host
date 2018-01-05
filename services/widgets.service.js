@@ -34,7 +34,7 @@ let createWidget = async function(widget, isMerchandise, product, attributes, ca
       return new ApiResponse(400, validation)
   }
   for (const categoryOption of categoryOptions) {
-    validation = WidgetCategoryOption.validate(categoryOption)
+    validation = WidgetCategoryOptionValidator.validate(categoryOption)
     if (validation !== 'pass')
       return new ApiResponse(400, validation)
   }
@@ -69,13 +69,13 @@ let getWidget = async function(widgetId) {
   let widget = await Widget.find({_id: widgetId})
   widget.attributes = await WidgetXWidgetAttribute.find({widgetId: widgetId})
   for (const widgetXWidgetAttribute of widget['attributes']) {
-    widgetXWidgetAttribute['widgetAttribute'] = await WidgetAttribute.find({_id: widgetXWidgetAttribute.widgetAttributeId})
+    widgetXWidgetAttribute['widgetAttributeForm'] = await WidgetAttribute.find({_id: widgetXWidgetAttribute.widgetAttributeId})
   }
   widget.categories = await WidgetXWidgetCategoryOption.find({widgetId: widgetId})
   for (const widgetXWidgetCategoryOption of widget.categories) {
-    widgetXWidgetCategoryOption.widgetCategoryOption = await WidgetCategoryOption.find({_id: widgetXWidgetCategoryOption.widgetCategoryOptionId})
-    let child = widgetXWidgetCategoryOption.widgetCategoryOption
-    while (child.widgetCategory !== 'reservedRootWidgetCategory') {
+    widgetXWidgetCategoryOption.widgetCategoryOptionName = await WidgetCategoryOption.find({_id: widgetXWidgetCategoryOption.widgetCategoryOptionId})
+    let child = widgetXWidgetCategoryOption.widgetCategoryOptionName
+    while (child.widgetCategoryName !== 'reservedRootWidgetCategory') {
       let parentWidgetCategory = await WidgetCategory.find({_id: child.parentId})
       parentWidgetCategory.child = child
       child = parentWidgetCategory
@@ -85,7 +85,7 @@ let getWidget = async function(widgetId) {
 }
 
 let searchWidgets = async function(widget, isMerchandise, attributes, categoryOptions) {
-  // search by a name, attribute, category (key) and a value?
+  // search by a widgetName, widgetAttributeForm, category (key) and a value?
 }
 
 let updateWidget = async function(widget, isMerchandise, attributes, categoryOptions) {
@@ -97,12 +97,19 @@ let deleteWidget = async function(widgetId) {
 }
 
 
-let createWidgetAttribute = async function(widgetAttribute) {
+let createWidgetAttribute = async function(widgetAttributeName) {
+  let widgetAttribute = new WidgetAttribute({widgetAttributeName: widgetAttributeName})
+  if ((await WidgetAttribute.find({widgetAttributeName: widgetAttributeName}).limit(1)).length > 0)
+    return new ApiResponse(400, new WidgetsRUsError({code: 'widget-attribute/already-exists',
+      context: 'WidgetService#createWidgetAttribute',
+      message: 'Failed validation: widget attribute name already exists',
+      data: {input: {widgetAttributeName: widgetAttributeName}}
+    }))
   return await BaseService.baseCreate(widgetAttribute, WidgetAttributeValidator)
 }
 
 let getWidgetAttributes = async function() {
-  return new ApiResponse(200, {attributes: await WidgetAttribute.find()})
+  return new ApiResponse(200, await WidgetAttribute.find())
 }
 
 let deleteWidgetAttribute = async function(widgetAttributeId) {
@@ -114,7 +121,7 @@ let deleteWidgetAttribute = async function(widgetAttributeId) {
  * @returns {Promise.<void>}
  */
 let createWidgetCategory = async function(widgetCategory) {
-  let completeWidgetCategory = new WidgetCategory({widgetCategory: widgetCategory})
+  let completeWidgetCategory = new WidgetCategory({widgetCategoryName: widgetCategory})
   return await BaseService.baseCreate(completeWidgetCategory, WidgetCategoryValidator)
 }
 
@@ -133,27 +140,29 @@ let createWidgetCategoryOption = async function(widgetCategoryOption) {
   return await BaseService.baseCreate(widgetCategoryOption, WidgetCategoryOptionValidator)
 }
 
-let recursiveBuildCategoryTree = async function(rootCategories, optionsIndex) {
+let recursiveBuildCategoryTree = async function(rootCategories, parentToOptionsMap) {
   for (const category of rootCategories) {
     let widgetCategories = await WidgetCategory.find({parentId: category._id})
     category['children'] = widgetCategories
-    await recursiveBuildCategoryTree(widgetCategories, optionsIndex)
-    category['children'].concat(optionsIndex[category._id])
+    await recursiveBuildCategoryTree(widgetCategories, parentToOptionsMap)
+    category['children'].concat(parentToOptionsMap[category._id])
   }
 }
 
 let getWidgetCategoriesAndOptions = async function() {
-  let rootWidgetCategories = await WidgetCategory.find({parentId: null})
+  let rootWidgetCategory = await WidgetCategory.find({widgetCategoryName: 'reservedRootWidgetCategory'})
+  let rootWidgetCategories = await WidgetCategory.find({parentId: rootWidgetCategory._id})
   let widgetCategoryOptions = await WidgetCategoryOption.find()
   let tree = {root: rootWidgetCategories}
-  let optionsIndex = {}
-  for (const widgetCategoryOption of widgetCategoryOptions) {
-    if (optionsIndex[widgetCategoryOption.parentId])
-      optionsIndex[widgetCategoryOption.parentId].push(widgetCategoryOption)
+  let parentToOptionsMap = {}
+  for (const option of widgetCategoryOptions) {
+    // if options already exist for this parentId, push a new element, otherwise create a new entry for this option's parentId
+    if (parentToOptionsMap[option.parentId])
+      parentToOptionsMap[option.parentId].push(option)
     else
-      optionsIndex[widgetCategoryOption.parentId] = [widgetCategoryOption]
+      parentToOptionsMap[option.parentId] = [option]
   }
-  await recursiveBuildCategoryTree(tree.root, optionsIndex)
+  await recursiveBuildCategoryTree(tree.root, parentToOptionsMap)
   return new ApiResponse(200, {categoryTree: tree})
 }
 
@@ -166,14 +175,14 @@ let deleteWidgetCategoryOption = async function(widgetCategoryOptionId) {
 }
 
 let associateWidgetAttributeWithWidget = async function(widgetId, attributeId) {
-  // check existence of attribute via Id and widget via Id
+  // check existence of widgetAttributeForm via Id and widget via Id
   // add entry to junction table WidgetXWidgetAttribute
   let modelToCreate = new WidgetXWidgetAttribute({widgetId: widgetId, attributeId: attributeId})
   return await BaseService.baseCreate(modelToCreate, WidgetXWidgetAttributeValidator)
 }
 
 let dissociateWidgetAttributeWithWidget = async function(widgetId, attributeId) {
-  // check existence of attribute via Id and widget via Id
+  // check existence of widgetAttributeForm via Id and widget via Id
   // remove entry to junction table WidgetXWidgetAttribute
   let whereClause = {widgetId: widgetId, attributeId: attributeId}
   return await BaseService.baseDeleteByWhereClause(WidgetXWidgetAttribute, whereClause,

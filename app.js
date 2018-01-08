@@ -44,6 +44,9 @@ let initializeDatabase = async function () {
     }).save()
     let typeWidgetCategory = await new WidgetCategory({parentId: rootWidgetCategory._id, widgetCategoryName: 'Type'}).save()
 
+    let rootCategories = await WidgetCategory.find({parentId: rootWidgetCategory._id})
+    console.log(rootCategories)
+
     let infinitesimalWidgetCategoryOption = await new WidgetCategoryOption({
       parentId: sizeWidgetCategory._id,
       widgetCategoryOptionName: 'Infinitesimal'

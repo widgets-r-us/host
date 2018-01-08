@@ -140,30 +140,39 @@ let createWidgetCategoryOption = async function(widgetCategoryOption) {
   return await BaseService.baseCreate(widgetCategoryOption, WidgetCategoryOptionValidator)
 }
 
-let recursiveBuildCategoryTree = async function(rootCategories, parentToOptionsMap) {
-  for (const category of rootCategories) {
-    let widgetCategories = await WidgetCategory.find({parentId: category._id})
-    category['children'] = widgetCategories
-    await recursiveBuildCategoryTree(widgetCategories, parentToOptionsMap)
-    category['children'].concat(parentToOptionsMap[category._id])
+let recursiveBuildCategoryTree = async function(categories, categoryToOptionsMap) {
+  if (!categories)
+    return []
+  for (const category of categories) {
+    category.children = await WidgetCategory.find({parentId: category._id}).lean()
+    let options = categoryToOptionsMap[category._id] || []
+    category.children = category.children.concat(options)
+    category.children = await recursiveBuildCategoryTree(category.children, categoryToOptionsMap)
   }
+  return categories
 }
 
+const reservedRootWidgetCategoryName = 'reservedRootWidgetCategory'
+
 let getWidgetCategoriesAndOptions = async function() {
-  let rootWidgetCategory = await WidgetCategory.find({widgetCategoryName: 'reservedRootWidgetCategory'})
-  let rootWidgetCategories = await WidgetCategory.find({parentId: rootWidgetCategory._id})
-  let widgetCategoryOptions = await WidgetCategoryOption.find()
-  let tree = {root: rootWidgetCategories}
-  let parentToOptionsMap = {}
+  let rootWidgetCategory = await WidgetCategory.findOne({widgetCategoryName: reservedRootWidgetCategoryName}).lean()
+  rootWidgetCategory.children = await WidgetCategory
+      .where({parentId: rootWidgetCategory._id})
+      .where('widgetCategoryName').ne(reservedRootWidgetCategoryName)
+      .find().lean()
+  let widgetCategoryOptions = await WidgetCategoryOption.find().lean()
+  let tree = {root: rootWidgetCategory}
+  let categoryToOptionsMap = {}
   for (const option of widgetCategoryOptions) {
     // if options already exist for this parentId, push a new element, otherwise create a new entry for this option's parentId
-    if (parentToOptionsMap[option.parentId])
-      parentToOptionsMap[option.parentId].push(option)
+    if (categoryToOptionsMap[option.parentId])
+      categoryToOptionsMap[option.parentId].push(option)
     else
-      parentToOptionsMap[option.parentId] = [option]
+      categoryToOptionsMap[option.parentId] = [option]
   }
-  await recursiveBuildCategoryTree(tree.root, parentToOptionsMap)
-  return new ApiResponse(200, {categoryTree: tree})
+  console.log(categoryToOptionsMap)
+  tree.root.children = await recursiveBuildCategoryTree(tree.root.children, categoryToOptionsMap)
+  return new ApiResponse(200, {categoryTreeRoot: tree.root})
 }
 
 /**
